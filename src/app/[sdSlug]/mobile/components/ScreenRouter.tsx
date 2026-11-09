@@ -34,6 +34,7 @@ const NotificationPrefsPage = dynamic(() => import("./screens/NotificationPrefsP
 const ProfileEditPage = dynamic(() => import("./screens/ProfileEditPage").then(m => ({ default: m.ProfileEditPage })), { loading });
 const WebsiteUrlPage = dynamic(() => import("./screens/WebsiteUrlPage").then(m => ({ default: m.WebsiteUrlPage })), { loading });
 const MessageComposePage = dynamic(() => import("./screens/MessageComposePage").then(m => ({ default: m.MessageComposePage })), { loading });
+const HymnsPage = dynamic(() => import("./screens/HymnsPage").then(m => ({ default: m.HymnsPage })), { loading });
 const MobileLoginScreen = dynamic(() => import("./screens/LoginPage").then(m => ({ default: m.MobileLoginScreen })), { loading });
 const MoreCardsPage = dynamic(() => import("./screens/MoreCardsPage").then(m => ({ default: m.MoreCardsPage })), { loading });
 
@@ -88,6 +89,7 @@ export function ScreenRouter({ pageSlug, config }: Props) {
     case "stream": return <StreamPage config={config} />;
     case "websiteUrl":
     case "page": return <WebsiteUrlPage config={config} />;
+    case "hymns": return <HymnsPage churchId={config?.church?.id} />;
     case "login": return <MobileLoginScreen config={config} />;
     default:
       console.warn("[mobile] unknown screen slug:", pageSlug);

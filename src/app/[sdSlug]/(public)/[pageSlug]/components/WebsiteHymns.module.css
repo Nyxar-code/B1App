@@ -1,0 +1,15 @@
+.reader {
+  --mb-primary: var(--primary, #1d4e89);
+  --mb-background: #f7f8fa;
+  --mb-surface: #fff;
+  --mb-text: #17212d;
+  --mb-text-secondary: #465262;
+  --mb-text-muted: #566171;
+  --mb-error: #a4242e;
+  --mb-border: #dfe3e8;
+  --mb-icon-background: #edf1f5;
+  --font-mobile-serif: var(--headingFont, Georgia);
+  max-width: 54rem;
+  margin-inline: auto;
+  padding-inline: clamp(0.5rem, 3vw, 1.5rem);
+}
