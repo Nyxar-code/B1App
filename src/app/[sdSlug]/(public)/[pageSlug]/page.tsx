@@ -12,6 +12,7 @@ import "@/styles/vendor/animations.css";
 import { Animate } from "@churchapps/apphelper/website";
 import { VotdPage } from "./components/VotdPage";
 import { BiblePage } from "./components/BiblePage";
+import { WebsiteHymns } from "./components/WebsiteHymns";
 import { StreamPage } from "./components/StreamPage";
 import { DefaultPageWrapper } from "./components/DefaultPageWrapper";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -21,7 +22,7 @@ import { RestrictedPage } from "@/components/RestrictedPage";
 import { resolveRedirect } from "@/helpers/RedirectHelper";
 import { pageTreePath } from "@/helpers/pageTreePath";
 
-const VIRTUAL_PAGE_SLUGS = ["votd", "bible", "donate", "stream", "sermons"];
+const VIRTUAL_PAGE_SLUGS = ["votd", "bible", "donate", "stream", "sermons", "hymns"];
 
 type PageParams = Promise<{ sdSlug: string; pageSlug: string; }>
 
@@ -38,6 +39,7 @@ export async function generateMetadata({ params }: {params:PageParams}): Promise
   if (!title) {
     switch (pageSlug) {
       case "votd": title = Locale.label("pageSlug.verseOfTheDay"); break;
+      case "hymns": title = "Hymns"; break;
       case "bible": title = Locale.label("pageSlug.bible"); break;
       case "sermons": title = Locale.label("pageSlug.sermons"); break;
       case "donate": title = Locale.label("pageSlug.donate"); break;
@@ -57,7 +59,10 @@ const loadData = async (sdSlug:string, pageSlug:string) => {
   return { pageData: pageData || ({} as PageInterface), config };
 };
 
-export default async function Home({ params }: { params: PageParams }) {
+export default async function Home({ params, searchParams }: {
+  params: PageParams;
+  searchParams: Promise<{ hymn?: string | string[] }>;
+}) {
   await EnvironmentHelper.initServerSide();
   const { sdSlug, pageSlug } = await params;
   const { pageData, config } = await loadSharedData(sdSlug, pageSlug);
@@ -80,12 +85,15 @@ export default async function Home({ params }: { params: PageParams }) {
     );
   }
 
+  const selectedHymn = !pageData?.url && pageSlug === "hymns" ? (await searchParams).hymn : undefined;
+
   const getPageContent = () => {
     let result = <PageLayout config={config} pageData={pageData} />;
 
     if (!pageData?.url) {
       switch (pageSlug) {
         case "votd": result = wrapDefaultPage(<VotdPage />); break;
+        case "hymns": result = wrapDefaultPage(<WebsiteHymns churchId={config.church.id} hymnId={typeof selectedHymn === "string" ? selectedHymn : undefined} />); break;
         case "bible": result = wrapDefaultPage(<BiblePage />); break;
         case "donate": result = wrapDefaultPage(<DonatePage config={config} />); break;
         case "stream": result = wrapDefaultPage(<StreamPage config={config} />); break;

@@ -1,16 +1,23 @@
-import type { HymnInterface, HymnVerseInterface } from "@churchapps/helpers";
-
 export type HymnLanguage = "English" | "Yoruba" | "Bilingual";
 
 export type HymnCopyrightStatus = "public-domain" | "licensed" | "church-original" | "restricted" | "unknown";
 
 export type HymnPublicationState = "draft" | "published" | "archived";
 
-export type HymnVerse = HymnVerseInterface;
+export interface HymnVerse {
+  order: number;
+  label?: string;
+  text: string;
+  language?: string;
+}
 
-export type Hymn = HymnInterface & {
+export interface Hymn {
   id: string;
   hymnNumber: number;
+  title: string;
+  language: HymnLanguage;
+  license?: string;
+  attribution?: string;
   lyrics?: string;
   verses?: HymnVerse[];
   englishLyrics?: string;
@@ -34,7 +41,7 @@ export type Hymn = HymnInterface & {
   chorus?: string;
   arrangement?: string;
   notes?: string;
-};
+}
 
 export type HymnInput = Omit<Hymn, "id">;
 

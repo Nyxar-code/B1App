@@ -10,7 +10,9 @@ import type { Hymn, HymnLanguage } from "@/features/hymns/types";
 import { mobileTheme } from "../mobileTheme";
 
 const matchesQuery = (hymn: Hymn, query: string): boolean => {
-  if (!query) return true;
+  const normalize = (value: string) => value.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
+  const search = normalize(query.trim());
+  if (!search) return true;
   const searchable = [
     hymn.hymnNumber.toString(),
     hymn.title,
@@ -24,15 +26,16 @@ const matchesQuery = (hymn: Hymn, query: string): boolean => {
     hymn.collection,
     hymn.denomination,
     ...(hymn.tags ?? [])
-  ].filter(Boolean).join(" ").toLocaleLowerCase();
-  return searchable.includes(query.toLocaleLowerCase());
+  ].filter(Boolean).join(" ");
+  return normalize(searchable).includes(search);
 };
 
 interface Props {
   churchId?: string;
+  listHref?: string;
 }
 
-export const HymnsPage = ({ churchId }: Props) => {
+export const HymnsPage = ({ churchId, listHref = "/mobile/hymns" }: Props) => {
   const tc = mobileTheme.colors;
   const [hymns, setHymns] = useState<Hymn[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,20 +94,20 @@ export const HymnsPage = ({ churchId }: Props) => {
         <TextField select size="small" label="Category" value={category} onChange={(event) => setCategory(event.target.value)}>
           <MenuItem value="all">All categories</MenuItem>{categories.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
         </TextField>
-        <Chip label="Favorites" icon={<Icon>bookmark</Icon>} onClick={() => setFavoritesOnly((value) => !value)} color={favoritesOnly ? "primary" : "default"} variant={favoritesOnly ? "filled" : "outlined"} sx={{ alignSelf: "center", justifySelf: { xs: "start", sm: "stretch" } }} />
+        <Chip label="Favorites" aria-pressed={favoritesOnly} icon={<Icon>bookmark</Icon>} onClick={() => setFavoritesOnly((value) => !value)} color={favoritesOnly ? "primary" : "default"} variant={favoritesOnly ? "filled" : "outlined"} sx={{ alignSelf: "center", justifySelf: { xs: "start", sm: "stretch" } }} />
       </Box>
       <Typography sx={{ fontSize: 12, color: tc.textMuted, mb: 1 }}>{filteredHymns.length} hymn{filteredHymns.length === 1 ? "" : "s"}</Typography>
       {filteredHymns.length === 0 ? (
         <Box sx={{ p: 4, textAlign: "center", bgcolor: tc.surface, border: `1px solid ${tc.border}`, borderRadius: `${mobileTheme.radius.lg}px` }}>
           <Icon sx={{ fontSize: 44, color: tc.textSecondary }}>search_off</Icon>
-          <Typography sx={{ color: tc.text, fontWeight: 700, mt: 1 }}>No hymns found</Typography>
-          <Typography sx={{ color: tc.textSecondary, fontSize: 14, mt: 0.5 }}>Try a different search or filter.</Typography>
+          <Typography sx={{ color: tc.text, fontWeight: 700, mt: 1 }}>{hymns.length ? "No hymns found" : "No hymns published yet"}</Typography>
+          <Typography sx={{ color: tc.textSecondary, fontSize: 14, mt: 0.5 }}>{hymns.length ? "Try a different search or filter." : "Published hymns will appear here."}</Typography>
         </Box>
       ) : filteredHymns.map((hymn) => {
         const favorite = favoriteIds.includes(hymn.id);
         return (
           <Box key={hymn.id} sx={{ display: "flex", alignItems: "center", gap: 1, p: 1.5, mb: 1, bgcolor: tc.surface, border: `1px solid ${tc.border}`, borderRadius: `${mobileTheme.radius.md}px` }}>
-            <Link href={`/mobile/hymns/${hymn.id}`} style={{ textDecoration: "none", color: "inherit", flex: 1, minWidth: 0 }}>
+            <Link href={listHref === "/mobile/hymns" ? `${listHref}/${encodeURIComponent(hymn.id)}` : `${listHref}?hymn=${encodeURIComponent(hymn.id)}`} style={{ textDecoration: "none", color: "inherit", flex: 1, minWidth: 0 }}>
               <Box sx={{ display: "flex", gap: 1.25, alignItems: "center" }}>
                 <Box sx={{ width: 38, height: 38, borderRadius: "50%", bgcolor: tc.iconBackground, color: tc.primary, display: "grid", placeItems: "center", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>{hymn.hymnNumber}</Box>
                 <Box sx={{ minWidth: 0 }}><Typography noWrap sx={{ color: tc.text, fontWeight: 700 }}>{hymn.title}</Typography><Typography sx={{ color: tc.textSecondary, fontSize: 12 }}>{hymn.language} · {hymn.category}</Typography></Box>

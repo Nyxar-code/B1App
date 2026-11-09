@@ -16,13 +16,14 @@ export class ApiHymnRepository implements HymnRepository {
   async list(query: HymnQuery = {}): Promise<Hymn[]> {
     if (!query.churchId) return [];
     const hymns = await ApiHelper.getAnonymous(publicPath(query.churchId), "ContentApi");
-    return (hymns || []).map(mapHymn);
+    if (!Array.isArray(hymns)) throw new Error("Invalid hymn list response");
+    return hymns.map(mapHymn);
   }
 
   async getById(id: string, query: HymnQuery = {}): Promise<Hymn | null> {
     if (!query.churchId) return null;
     const hymn = await ApiHelper.getAnonymous(publicPath(query.churchId, id), "ContentApi");
-    return hymn ? mapHymn(hymn) : null;
+    return hymn?.id ? mapHymn(hymn) : null;
   }
 }
 
