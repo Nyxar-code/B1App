@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Locale } from "@churchapps/apphelper";
 import { ScreenSkeleton } from "./ScreenSkeleton";
@@ -34,36 +34,30 @@ const NotificationPrefsPage = dynamic(() => import("./screens/NotificationPrefsP
 const ProfileEditPage = dynamic(() => import("./screens/ProfileEditPage").then(m => ({ default: m.ProfileEditPage })), { loading });
 const WebsiteUrlPage = dynamic(() => import("./screens/WebsiteUrlPage").then(m => ({ default: m.WebsiteUrlPage })), { loading });
 const MessageComposePage = dynamic(() => import("./screens/MessageComposePage").then(m => ({ default: m.MessageComposePage })), { loading });
+const HymnsPage = dynamic(() => import("./screens/HymnsPage").then(m => ({ default: m.HymnsPage })), { loading });
 const MobileLoginScreen = dynamic(() => import("./screens/LoginPage").then(m => ({ default: m.MobileLoginScreen })), { loading });
 const MoreCardsPage = dynamic(() => import("./screens/MoreCardsPage").then(m => ({ default: m.MoreCardsPage })), { loading });
-const HymnsPage = dynamic(() => import("./screens/HymnsPage").then(m => ({ default: m.HymnsPage })), { loading });
 
 interface Props {
   pageSlug: string;
   config: ConfigurationInterface;
 }
 
-const ALIAS_TO_CANONICAL: Record<string, string> = {
-  membersSearch: "community",
-  giving: "donate",
-  attendance: "checkin"
-};
+const ALIAS_TO_CANONICAL: Record<string, string> = { membersSearch: "community" };
 
 export function ScreenRouter({ pageSlug, config }: Props) {
   const router = useRouter();
-  const { sdSlug } = useParams<{ sdSlug: string }>();
 
   React.useEffect(() => {
     const canonical = ALIAS_TO_CANONICAL[pageSlug];
-    if (canonical) router.replace(`/${sdSlug}/mobile/${canonical}`);
-  }, [pageSlug, router, sdSlug]);
+    if (canonical) router.replace(`/mobile/${canonical}`);
+  }, [pageSlug, router]);
 
   const effectiveSlug = ALIAS_TO_CANONICAL[pageSlug] ?? pageSlug;
 
   switch (effectiveSlug) {
     case "dashboard": return <DashboardPage config={config} />;
     case "more": return <MoreCardsPage config={config} />;
-    case "hymns": return <HymnsPage churchId={config?.church?.id} />;
     case "sermons": return <SermonsPage config={config} />;
     case "groups":
     case "myGroups": return <GroupsPage config={config} />;
@@ -95,6 +89,7 @@ export function ScreenRouter({ pageSlug, config }: Props) {
     case "stream": return <StreamPage config={config} />;
     case "websiteUrl":
     case "page": return <WebsiteUrlPage config={config} />;
+    case "hymns": return <HymnsPage churchId={config?.church?.id} />;
     case "login": return <MobileLoginScreen config={config} />;
     default:
       console.warn("[mobile] unknown screen slug:", pageSlug);
